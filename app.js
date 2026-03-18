@@ -20,6 +20,14 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Normalize multiple slashes (e.g. /api/v1//auth) to improve routing robustness.
+app.use((req, res, next) => {
+  if (req.url.includes('//')) {
+    req.url = req.url.replace(/\/+/g, '/');
+  }
+  next();
+});
+
 app.use('/', indexRouter);
 //localhost:3000/users
 app.use('/api/v1/users', require('./routes/users'));
@@ -44,15 +52,15 @@ app.use(function (req, res, next) {
   next(createError(404));
 });
 
-// error handler
+// error handler (API-friendly JSON response)
 app.use(function (err, req, res, next) {
   // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  const isDev = req.app.get('env') === 'development';
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  res.status(err.status || 500).json({
+    message: err.message || 'Internal Server Error',
+    ...(isDev ? { stack: err.stack } : {})
+  });
 });
 
 module.exports = app;

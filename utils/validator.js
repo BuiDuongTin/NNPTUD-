@@ -15,32 +15,42 @@ module.exports = {
         next()
     },
     CreateAnUserValidator: [
-        body('email').notEmpty().withMessage("email khong duoc de trong").bail().isEmail().withMessage("email sai dinh dang"),
-        body('username').notEmpty().withMessage("username khong duoc de trong").bail().isAlphanumeric().withMessage("username khong duoc chua ki tu dac biet"),
-        body('password').notEmpty().withMessage("password khong duoc de trong").bail().isStrongPassword({
+        body('email').notEmpty().withMessage("Email không được để trống").bail().isEmail().withMessage("Email sai định dạng"),
+        body('username').notEmpty().withMessage("Username không được để trống").bail().isAlphanumeric().withMessage("Username không được chứa ký tự đặc biệt"),
+        body('password').notEmpty().withMessage("Password không được để trống").bail().isStrongPassword({
             minLength: 8,
             minLowercase: 1,
             minNumbers: 1,
             minSymbols: 1,
             minUppercase: 1
-        }).withMessage("password phai co it nhat 8 ki tu trong do co it nhat: 1 ki tu hoa, 1 ki tu thuong, 1 ki tu dac biet va 1 ki tu so"),
-        body('role').notEmpty().withMessage("role khong duoc de trong").bail().isMongoId().withMessage("role phai la ID"),
-        body('avatarUrl').optional().isArray().withMessage("hinh anh khong hop le"),
-        body('avatarUrl.*').optional().isURL().withMessage("URL khong hop le")
+        }).withMessage("Password phải có ít nhất 8 ký tự trong đó có ít nhất: 1 ký tự hoa, 1 ký tự thường, 1 ký tự đặc biệt và 1 ký tự số"),
+        body('role').notEmpty().withMessage("Role không được để trống").bail().isMongoId().withMessage("Role phải là ID"),
+        body('avatarUrl').optional().isArray().withMessage("Hình ảnh không hợp lệ"),
+        body('avatarUrl.*').optional().isURL().withMessage("URL không hợp lệ")
     ],
     ModifyAnUserValidator: [
-        body('email').optional().isEmail().withMessage("email sai dinh dang"),
-        body('username').isEmpty().withMessage("username khong duoc cap nhat"),
-        body('_id').isEmpty().withMessage("_id khong duoc cap nhat"),
-        body('password').notEmpty().withMessage("password khong duoc de trong").bail().isStrongPassword({
+        body('email').optional().isEmail().withMessage("Email sai định dạng"),
+        body('username').isEmpty().withMessage("Username không được cập nhật"),
+        body('_id').isEmpty().withMessage("_ID không được cập nhật"),
+        body('password').notEmpty().withMessage("Password không được để trống").bail().isStrongPassword({
             minLength: 8,
             minLowercase: 1,
             minNumbers: 1,
             minSymbols: 1,
             minUppercase: 1
-        }).withMessage("password phai co it nhat 8 ki tu trong do co it nhat: 1 ki tu hoa, 1 ki tu thuong, 1 ki tu dac biet va 1 ki tu so"),
-        body('role').optional().isMongoId().withMessage("role phai la ID"),
-        body('avatarUrl').optional().isArray().withMessage("hinh anh khong hop le"),
-        body('avatarUrl.*').optional().isURL().withMessage("URL khong hop le")
+        }).withMessage("Password phải có ít nhất 8 ký tự trong đó có ít nhất: 1 ký tự hoa, 1 ký tự thường, 1 ký tự đặc biệt và 1 ký tự số"),
+        body('role').optional().isMongoId().withMessage("Role phải là ID"),
+        body('avatarUrl').optional().isArray().withMessage("Hình ảnh không hợp lệ"),
+        body('avatarUrl.*').optional().isURL().withMessage("URL không hợp lệ")
     ],
+    ChangePasswordValidator: [
+        body('oldPassword').notEmpty().withMessage("oldPassword không được để trống"),
+        body('newPassword').notEmpty().withMessage("newPassword không được để trống").bail().isStrongPassword({
+            minLength: 8,
+            minLowercase: 1,
+            minNumbers: 1,
+            minSymbols: 1,
+            minUppercase: 1
+        }).withMessage("newPassword phải có ít nhất 8 ký tự trong đó có ít nhất: 1 ký tự hoa, 1 ký tự thường, 1 ký tự đặc biệt và 1 ký tự số")
+    ]
 }

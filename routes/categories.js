@@ -19,14 +19,14 @@ router.get('/:id', async function (req, res, next) {
     let result = await categoryModel.findById(id);
     if (!result || result.isDeleted) {
       res.status(404).send({
-        message: "ID NOT FOUND"
+        message: "Không tìm thấy ID."
       });
     } else {
       res.send(result)
     }
   } catch (error) {
     res.status(404).send({
-      message: "ID NOT FOUND"
+      message: "Không tìm thấy ID."
     });
   }
 });
@@ -46,7 +46,7 @@ router.get('/:id/products', function (req, res, next) {
     res.send(result)
   } else {
     res.status(404).send({
-      message: "ID NOT FOUND"
+      message: "Không tìm thấy ID."
     });
   }
 });
@@ -103,7 +103,7 @@ router.delete('/:id', async function (req, res, next) {
     let result = await categoryModel.findById(id);
     if (!result || result.isDeleted) {
       res.status(404).send({
-        message: "ID NOT FOUND"
+        message: "Không tìm thấy ID."
       });
     } else {
       result.isDeleted = true;
@@ -112,7 +112,7 @@ router.delete('/:id', async function (req, res, next) {
     }
   } catch (error) {
     res.status(404).send({
-      message: "ID NOT FOUND"
+      message: "Không tìm thấy ID."
     });
   }
 })

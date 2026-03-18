@@ -3,12 +3,15 @@ let router = express.Router()
 let userController = require('../controllers/users')
 let bcrypt = require('bcrypt');
 const { CheckLogin } = require('../utils/authHandler');
+const { validatedResult, ChangePasswordValidator } = require('../utils/validator');
+const { privateKey } = require('../utils/jwtKeys');
 let jwt = require('jsonwebtoken')
+
 router.post('/register', async function (req, res, next) {
     try {
         let { username, password, email } = req.body;
         let newUser = await userController.CreateAnUser(username, password, email,
-            "69b1265c33c5468d1c85aad8"
+            "69b10eeb3c777ca002239580"
         )
         res.send(newUser)
     } catch (error) {
@@ -24,23 +27,23 @@ router.post('/login', async function (req, res, next) {
         let user = await userController.GetAnUserByUsername(username);
         if (!user) {
             res.status(404).send({
-                message: "thong tin dang nhap khong dung"
+                message: "Thông tin đăng nhập không đúng."
             })
             return;
         }
         if (user.lockTime > Date.now()) {
             res.status(404).send({
-                message: "ban dang bi ban"
+                message: "Bạn đang bị cấm đăng nhập."
             })
             return;
         }
         if (bcrypt.compareSync(password, user.password)) {
             user.loginCount = 0;
             await user.save()
-            //let priK = fs.readFileSync('privateKey.pem')
             let token = jwt.sign({
                 id: user._id
-            }, 'secret', {
+            }, privateKey, {
+                algorithm: 'RS256',
                 expiresIn: '1d'
             })
             res.send(token)
@@ -52,7 +55,7 @@ router.post('/login', async function (req, res, next) {
             }
             await user.save()
             res.status(404).send({
-                message: "thong tin dang nhap khong dung"
+                message: "Thông tin đăng nhập không đúng."
             })
         }
     } catch (error) {
@@ -64,4 +67,37 @@ router.post('/login', async function (req, res, next) {
 router.get('/me', CheckLogin, function (req, res, next) {
     res.send(req.user)
 })
+
+router.post('/changepassword', CheckLogin, ChangePasswordValidator, validatedResult, async function (req, res, next) {
+    try {
+        let { oldPassword, newPassword } = req.body;
+        let user = req.user;
+
+        if (!bcrypt.compareSync(oldPassword, user.password)) {
+            res.status(400).send({
+                message: "oldPassword không chính xác."
+            })
+            return;
+        }
+
+        if (oldPassword === newPassword) {
+            res.status(400).send({
+                message: "newPassword phải khác oldPassword."
+            })
+            return;
+        }
+
+        user.password = newPassword;
+        await user.save();
+
+        res.send({
+            message: "Đổi mật khẩu thành công."
+        })
+    } catch (error) {
+        res.status(404).send({
+            message: error.message
+        })
+    }
+})
+
 module.exports = router

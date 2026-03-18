@@ -1,26 +1,29 @@
 let userController = require('../controllers/users')
 let jwt = require('jsonwebtoken')
+let { publicKey } = require('./jwtKeys')
+
 module.exports = {
     CheckLogin: async function (req, res, next) {
         try {
             let token = req.headers.authorization;
             if (!token) {
                 res.status(404).send({
-                    message: "ban chua dang nhap"
+                    message: "Bạn chưa đăng nhập."
                 })
                 return;
             }
-            let result = jwt.verify(token, "secret")
-            if (result.exp * 1000 < Date.now()) {
-                res.status(404).send({
-                    message: "ban chua dang nhap"
-                })
-                return;
+
+            // Support "Bearer <token>" Authorization header format.
+            if (token.toLowerCase().startsWith('bearer ')) {
+                token = token.slice(7).trim();
             }
+
+            let result = jwt.verify(token, publicKey, { algorithms: ['RS256'] })
+
             let user = await userController.GetAnUserById(result.id);
             if (!user) {
                 res.status(404).send({
-                    message: "ban chua dang nhap"
+                    message: "Bạn chưa đăng nhập."
                 })
                 return;
             }
@@ -28,7 +31,7 @@ module.exports = {
             next()
         } catch (error) {
             res.status(404).send({
-                message: "ban chua dang nhap"
+                message: "Bạn chưa đăng nhập."
             })
         }
     }
